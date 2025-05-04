@@ -26,11 +26,9 @@ TaskmgrPlayerASM 是一个基于 [svr2kos2/TaskmgrPlayer](https://github.com/svr
 
 1.  **克隆仓库：**
     ```cmd
-    git clone [https://github.com/YourGitHubUsername/TaskmgrPlayerASM.git](https://github.com/YourGitHubUsername/TaskmgrPlayerASM.git)
+    git clone [https://github.com/idealend-Bin/TaskmgrPlayerASM.git](https://github.com/idealend-Bin/TaskmgrPlayerASM.git)
     cd TaskmgrPlayerASM
     ```
-    (如果你是创建了一个新的独立仓库，并且还没有上传，那么这步是给未来的用户看的。如果是 GitHub fork，链接会是你的 fork 地址)
-
 2.  **准备 OpenCV：**
     * 下载并安装 OpenCV 库。
     * 配置你的编译环境，确保 C++ 编译器能找到 OpenCV 的头文件 (`include` 目录) 和库文件 (`lib` 目录)。
@@ -86,4 +84,4 @@ TaskmgrPlayerASM 是一个基于 [svr2kos2/TaskmgrPlayer](https://github.com/svr
 感谢所有在项目开发过程中提供帮助和建议的朋友。
 
 作者 (Author)
-Idealend Bin - [你的 GitHub 主页链接或其他联系方式]
+Idealend Bin
