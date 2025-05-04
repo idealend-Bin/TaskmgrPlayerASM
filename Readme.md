@@ -66,7 +66,6 @@ TaskmgrPlayerASM 是一个基于 [svr2kos2/TaskmgrPlayer](https://github.com/svr
 1.  将编译生成的 `TaskmgrPlayerASM.exe` 可执行文件、所需的 OpenCV DLL 文件以及你想要播放的视频文件 (例如 `BadApple.flv`) 放在同一个目录下。
 2.  运行 `TaskmgrPlayerASM.exe`。
 3.  打开 Windows 任务管理器，并切换到“性能”标签页。程序应该会自动找到任务管理器窗口并在其中显示视频。
-4.  （如果保留了配置功能）你可以在同一目录下放置一个 `config.cfg` 文件来调整显示设置。
 
 
 ```
