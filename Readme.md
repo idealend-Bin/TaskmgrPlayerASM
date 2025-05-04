@@ -73,7 +73,7 @@ TaskmgrPlayerASM 是一个基于 [svr2kos2/TaskmgrPlayer](https://github.com/svr
 
 ```
 许可协议 (License)
-本项目遵循 GNU General Public License v3.0 许可协议。详情请参见项目根目录下的 https://www.google.com/search?q=LICENSE 文件。
+本项目遵循 GNU General Public License v3.0 许可协议。详情请参见项目根目录下的 LICENSE 文件。
 
 本项目是基于 svr2kos2/TaskmgrPlayer (GPL-3.0 协议) 的衍生作品。
 
