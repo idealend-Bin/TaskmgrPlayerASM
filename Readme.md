@@ -1,6 +1,6 @@
 # TaskmgrPlayerASM
 
-![GitHub上原项目的可能的截图，如果你有的话可以放一个](Iamges/TaskmgrPlayerASM.png)
+![GitHub上原项目的可能的截图，如果你有的话可以放一个](Images/TaskmgrPlayerASM.png)
 
 在任务管理器的性能标签页中播放视频，核心逻辑使用 x64 汇编重写。
 
