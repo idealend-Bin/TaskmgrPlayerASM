@@ -1,6 +1,6 @@
 # TaskmgrPlayerASM
 
-![GitHub上原项目的可能的截图，如果你有的话可以放一个](Images/TaskmgrPlayerASM.png)
+![DEMO](Images/TaskmgrPlayerASM.png)
 
 在任务管理器的性能标签页中播放视频，核心逻辑使用 x64 汇编重写。
 
@@ -83,3 +83,5 @@ TaskmgrPlayerASM 是一个基于 [svr2kos2/TaskmgrPlayer](https://github.com/svr
 
 作者 (Author)
 Idealend Bin
+
+这是我的第一个开源项目, 如果有什么地方有不对的欢迎提Issue!
