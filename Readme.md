@@ -16,7 +16,7 @@ TaskmgrPlayerASM 是一个基于 [svr2kos2/TaskmgrPlayer](https://github.com/svr
 
 * 在 Windows 任务管理器的性能标签页中内嵌并播放视频。
 * 核心窗口查找、判断和主流程控制逻辑由 x64 汇编实现。
-* 利用 OpenCV 进行视频解码、图像处理 (二值化, 边缘检测) 和窗口显示。
+* 利用 OpenCV 进行视频解码、图像处理和窗口显示。
 * 支持播放指定视频文件 (如 BadApple.flv)。
 
 ## 构建 (Building)
