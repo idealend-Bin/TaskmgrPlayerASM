@@ -32,17 +32,21 @@
 #define UNICODE
 #endif // UNICODE
 
-#include <Windows.h> // 包含 WinAPI 函数、HWND, RECT 等，通常也包含了 lstrcpyW 和 lstrcmpW
+#include <Windows.h> // include Windows.h for window management functions
 
-#include <opencv2/opencv.hpp> // 包含 OpenCV 的核心功能，推荐使用 opencv2/... 风格的头文件路径
+#include <opencv2/opencv.hpp> // include OpenCV for image processing
 
 #pragma comment(lib, "winmm.lib") // Link winmm.lib for PlaySoundW
 #pragma comment(lib, "User32.lib") // Link User32.lib for window management functions
 #pragma comment(lib, "Kernel32.lib") // Link Kernel32.lib for console functions
-// 可能还需要其他库，具体取决于使用的 WinAPI 函数，例如 Gdi32.lib, Advapi32.lib 等
+#pragma comment(lib, "gdi32.lib") // Link gdi32.lib for drawing functions
+#pragma comment(lib, "advapi32.lib") // Link advapi32.lib for PlaySoundW
+#pragma comment(lib, "ucrt.lib") // Link ucrt.lib for C++ standard library functions
+#pragma comment(lib, "vcruntime.lib") // Link vcruntime.lib for C++ standard library functions
+#pragma comment(lib, "legacy_stdio_definitions.lib") // Link legacy_stdio_definitions.lib for printf/scanf functions
 
 
-using namespace cv; // 保留 using namespace cv;
+using namespace cv; // Maybe unnecessary, We later use ::ce::
 
 // Global constants - const wchar_t[] are C-compatible data
 // These variables are defined in one of the assembly files and accessed here.
@@ -52,16 +56,16 @@ extern "C" {
 	extern wchar_t ChildClassName[] = L"CvChartWindow"; // Specific child window class name to find within Task Manager
 
 	// OpenCV drawing colors (Vec3b is an OpenCV type, defined in ASM .data)
-	extern Vec3b colorEdge = { 187, 125, 12 };
-	extern Vec3b colorDark = { 250, 246, 241 };
-	extern Vec3b colorBright = { 255, 255, 255 };
-	extern Vec3b colorGrid = { 244, 234, 217 };
-	extern Vec3b colorFrame = { 187, 125, 12 };
+	extern Vec3b ColorEdge = { 187, 125, 12 };
+	extern Vec3b ColorDark = { 250, 246, 241 };
+	extern Vec3b ColorBright = { 255, 255, 255 };
+	extern Vec3b ColorGrid = { 244, 234, 217 };
+	extern Vec3b ColorFrame = { 187, 125, 12 };
 
 	extern bool DrawGrid = true; // Flag to control drawing grid
 	extern int Conuter = 0; // Simple counter (Purpose might need clarification)
 
-	volatile extern HWND EnumHWnd = 0; // Handle to the found target window (Task Manager or its child)
+	extern volatile HWND EnumHWnd = 0; // Handle to the found target window (Task Manager or its child)
 
 	// Buffer to store the class name to enumerate (used by EnumChildWindowsProc)
 	extern wchar_t ClassNameToEnum[256]{};
@@ -72,18 +76,18 @@ extern "C" {
 // Note: FindWnd, EnumChildWindowsProc, Play are now fully in ASM and not called directly from *this* C++ file anymore.
 extern "C" BOOL IsSmallerWindowLogic(HWND hWnd); // Implemented in IsSmallerWindow.asm - Used by EnumChildWindowsProc (in ASM)
 
-extern "C" void OutPutDbg(int* frameCount, double frameTime, int w, int h, clock_t s); // Implemented in OutPutDbg.asm
+extern "C" void OutPutDbg(int* pFrameCount, double dbFrameTime, int iW, int iH, clock_t clock); // Implemented in OutPutDbg.asm
 
 // Wrapper for OpenCV's namedWindow() - Called by Play (in ASM)
-extern "C" void NamedWindow(const char* name, int flags)
+extern "C" void NamedWindow(const char* strName, int iFlags)
 {
-	namedWindow(name, flags); // Call OpenCV C++ function namedWindow, which accepts const char*
+	namedWindow(strName, iFlags); // Call OpenCV C++ function namedWindow, which accepts const char*
 }
 
 // Wrapper for OpenCV's waitKey() - Called by OutPutDbg (in ASM)
-extern "C" int WaitKey(int delay) 
+extern "C" int WaitKey(int iDelay) 
 {
-	return waitKey(delay); // Call OpenCV C++ function waitKey, which returns int
+	return waitKey(iDelay); // Call OpenCV C++ function waitKey, which returns int
 }
 // --- C++ Functions Retained (Due to Extensive OpenCV C++ API Usage) ---
 
@@ -108,35 +112,35 @@ extern "C" void Binarylize(Mat& src)
 	for (int r = 0; r < src.rows; ++r)
 	{
 		// Get pointer to the current row
-		Vec3b* src_row_ptr = src.ptr<Vec3b>(r);
-		uchar* bin_row_ptr = bin.ptr<uchar>(r);
-		uchar* edge_row_ptr = edge.ptr<uchar>(r);
+		Vec3b* srcRow = src.ptr<Vec3b>(r);
+		uchar* binRow = bin.ptr<uchar>(r);
+		uchar* edgeRow = edge.ptr<uchar>(r);
 
 		for (int c = 0; c < src.cols; ++c)
 		{
 			// Direct pixel access via pointer
-			src_row_ptr[c] = ((bin_row_ptr[c] == 255) ? colorBright : colorDark);
+			srcRow[c] = ((binRow[c] == 255) ? ColorBright : ColorDark);
 			if(DrawGrid)
-				if (r % gridHeight == 0 || (c + gridOffset) % gridWidth == 0) src_row_ptr[c] = colorGrid;
-			if (edge_row_ptr[c] == 255) src_row_ptr[c] = colorEdge;
+				if (r % gridHeight == 0 || (c + gridOffset) % gridWidth == 0) srcRow[c] = ColorGrid;
+			if (edgeRow[c] == 255) srcRow[c] = ColorEdge;
 		}
 	}
 	// rectangle uses Rect and Scalar (OpenCV C++ types)
 	// Note: thickness 0.1 is unusual, typically integer thickness. 0 means no border. Maybe intended 1?
-	rectangle(src, Rect{ 0,0,src.cols,src.rows }, colorFrame, 0.1); // OpenCV C++ function, uses C++ types
+	rectangle(src, Rect{ 0, 0, src.cols, src.rows }, ColorFrame, 0.1); // OpenCV C++ function, uses C++ types
 }
 
 
 
 // Main loop for video playback and window updates - Called by Play (in ASM)
-extern "C" void PlayLoop(const char* videoName, const char* wndName, int* frameCount, HWND playerWnd, RECT rect)
+extern "C" void PlayLoop(const char* strVideoName, const char* strWndName, int* pFrameCount, HWND playerWnd, RECT rect)
 {
 	// Note: videoName, wndName, frameCount*, playerWnd, rect are passed from Play.asm
-	VideoCapture video(videoName); // VideoCapture is an OpenCV C++ class
+	VideoCapture video(strVideoName); // VideoCapture is an OpenCV C++ class
 
 	if (!video.isOpened()) // Check if video file opened successfully (Error handling logic rewritten by Idealend Bin)
 	{
-		wprintf(L"Error: Could not open video file %hs\n", videoName); // Use %hs for char* in wprintf for consistent wide output
+		wprintf(L"Error: Could not open video file %hs\n", strVideoName); // Use %hs for char* in wprintf for consistent wide output
 		// The loop condition 'video.read(frame)' will be false if not opened, so loop will be skipped.
 		// No need for 'return' here.
 	}
@@ -147,7 +151,7 @@ extern "C" void PlayLoop(const char* videoName, const char* wndName, int* frameC
 	// Loop through video frames
 	// Loop structure is C-compatible (for loop with initialization, condition, and increment)
 	// video.read(frame) reads the next frame into 'frame' Mat. Returns true on success.
-	for (Mat frame; video.read(frame); (*frameCount)++)
+	for (Mat frame; video.read(frame); (*pFrameCount)++)
 	{
 		clock_t s = clock(); // Get current time using CRT function
 
@@ -168,7 +172,7 @@ extern "C" void PlayLoop(const char* videoName, const char* wndName, int* frameC
 			Binarylize(frame); // Process the frame (now resized)
 
 			// Display the processed frame in the named window
-			imshow(wndName, frame); // Display the frame (now processed and resized)
+			imshow(strWndName, frame); // Display the frame (now processed and resized)
 		}
 		else
 		{
@@ -177,14 +181,14 @@ extern "C" void PlayLoop(const char* videoName, const char* wndName, int* frameC
 		}
 
 		// Output debug information to the console
-		OutPutDbg(frameCount, frameTime, w, h, s); // Call OutPutDbg function (Implemented in ASM)
+		OutPutDbg(pFrameCount, frameTime, w, h, s); // Call OutPutDbg function (Implemented in ASM)
 
 		// The while loop for timing is now handled inside OutPutDbg (in ASM)
 		// The waitKey call for pacing is also inside OutPutDbg (in ASM)
 	}
 
 	// After the loop, destroy the OpenCV window
-	destroyWindow(wndName);
+	destroyWindow(strWndName);
 	// Optional: release the video capture object
 	// video.release(); // VideoCapture destructor will handle this automatically
 }
